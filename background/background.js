@@ -1,19 +1,19 @@
 // Cau hinh fire base
 const firebaseConfig = {
-  apiKey: 'AIzaSyADsj8ffSWb9CPOj-gH0p37vFnw7DO9T64',
-  authDomain: 'todoapp-ae180.firebaseapp.com',
-  databaseURL: 'https://todoapp-ae180-default-rtdb.firebaseio.com/',
-  projectId: 'todoapp-ae180',
-  storageBucket: 'todoapp-ae180.appspot.com',
-  messagingSenderId: '846048091861',
-  appId: '1:846048091861:web:5bc309202061df77bd4c5c',
-  measurementId: 'G-PQE7PQB33C',
+  apiKey: 'AIzaSyBAJr3ooGz31cQh4eiLMdqGaF9GwJ3QBcI',
+  authDomain: 'myshopkit-66efe.firebaseapp.com',
+  databaseURL: 'https://myshopkit-66efe-default-rtdb.firebaseio.com',
+  projectId: 'myshopkit-66efe',
+  storageBucket: 'myshopkit-66efe.appspot.com',
+  messagingSenderId: '1070248391172',
+  appId: '1:1070248391172:web:1288ca7181ab0dbfe1fb51',
+  measurementId: 'G-BTE3EGDBKH',
 };
 
 // Khoi tao Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-const todoRef = database.ref('todoapp-ae180-default-rtdb');
+const dbRef = database.ref('helps');
 
 const connectedRef = database.ref('.info/connected');
 connectedRef.on('value', snapshot => {
@@ -26,6 +26,7 @@ connectedRef.on('value', snapshot => {
 
 // Lang nghe thay doi tu database, tao notification moi
 function createNotification(snapshot) {
+  console.log(snapshot.val());
   if (snapshot.val()) {
     const notification = {
       type: 'basic',
@@ -40,10 +41,7 @@ function createNotification(snapshot) {
 }
 
 function enableListener() {
-  todoRef
-    .orderByChild('complete')
-    .equalTo(false)
-    .on('value', createNotification);
+  dbRef.on('value', createNotification);
 }
 
 // Mo tab moi/update tab hien tai
@@ -81,7 +79,7 @@ chrome.windows.onRemoved.addListener(windowId => {
     if (staff && staff.isOnline) {
       staff.isOnline = !staff.isOnline;
       chrome.storage.sync.set({ wilSupportStaff: staff });
-      todoRef.off('value', createNotification);
+      dbRef.off('value', createNotification);
     }
   });
 });
