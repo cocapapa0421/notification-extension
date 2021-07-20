@@ -1,3 +1,3 @@
 const config = {
-  url: 'http://localhost:1234/',
+  url: 'https://support-myshopkit.netlify.app/',
 };
