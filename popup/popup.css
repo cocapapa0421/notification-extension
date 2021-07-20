@@ -1,5 +1,10 @@
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
 html {
   font-size: 62.5%;
+  box-sizing: border-box;
 }
 
 body {
@@ -53,7 +58,7 @@ input, button, textarea, select {
   background-color: #e7e7e7;
 }
 
-.form__button {
+.button {
   display: block;
   cursor: pointer;
   outline: none;
@@ -62,5 +67,17 @@ input, button, textarea, select {
   width: 100%;
   padding: 1rem 3rem;
   background-image: linear-gradient(135deg, #FF5759, #FF4E96);
-  color: #fff
+  color: #fff;
+}
+
+.re-register {
+  display: block;
+  margin-top: 1rem;
+  opacity: 0;
+  text-align: right;
+  transition: .25s ease-in-out
+}
+
+.re-register.is-active {
+  opacity: 1;
 }
