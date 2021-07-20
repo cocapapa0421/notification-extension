@@ -15,25 +15,15 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const dbRef = database.ref('helps');
 
-const connectedRef = database.ref('.info/connected');
-connectedRef.on('value', snapshot => {
-  if (snapshot.val() === true) {
-    console.log('connected');
-  } else {
-    console.log('not connected');
-  }
-});
-
 // Lang nghe thay doi tu database, tao notification moi
 function createNotification(snapshot) {
-  console.log(snapshot.val());
-  if (snapshot.val()) {
+  if (!!snapshot.val()) {
+    const [key, item] = Object.entries(snapshot.val());
     const notification = {
       type: 'basic',
       iconUrl: './images/48.png',
-      title: 'Request support from wiloke.com',
-      message: 'Do you have a new support request?',
-      contextMessage: 'Request support!',
+      title: item.shopName,
+      message: 'Dang can support',
       buttons: [{ title: 'Support', iconUrl: '/images/16.png' }],
     };
     chrome.notifications.create('', notification);
@@ -42,6 +32,10 @@ function createNotification(snapshot) {
 
 function enableListener() {
   dbRef.on('value', createNotification);
+}
+
+function disableListener() {
+  dbRef.off('value', createNotification);
 }
 
 // Mo tab moi/update tab hien tai
@@ -57,12 +51,23 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+// Dong cua so (window) hien tai
+chrome.windows.onRemoved.addListener(windowId => {
+  chrome.storage.sync.get('wilSupportStaff', ({ wilSupportStaff: staff }) => {
+    if (staff && staff.isOnline) {
+      staff.isOnline = !staff.isOnline;
+      chrome.storage.sync.set({ wilSupportStaff: staff });
+      disableListener();
+    }
+  });
+});
+
 // Chrome notifycation button clicked
 chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
   if (btnIdx === 0) {
     chrome.storage.sync.get('wilSupportStaff', ({ wilSupportStaff: sfatt }) => {
       if (sfatt) {
-        let url = `${config.url}?position=${sfatt.position}`;
+        let url = `${config.url}?role=${sfatt.role}`;
         chrome.tabs.create({ url });
       } else {
         chrome.tabs.create({ url: config.url });
@@ -73,25 +78,16 @@ chrome.notifications.onButtonClicked.addListener((notifId, btnIdx) => {
   chrome.notifications.clear(notifId);
 });
 
-// Dong cua so (window) hien tai
-chrome.windows.onRemoved.addListener(windowId => {
-  chrome.storage.sync.get('wilSupportStaff', ({ wilSupportStaff: staff }) => {
-    if (staff && staff.isOnline) {
-      staff.isOnline = !staff.isOnline;
-      chrome.storage.sync.set({ wilSupportStaff: staff });
-      dbRef.off('value', createNotification);
-    }
-  });
-});
-
 // onMessage
 chrome.runtime.onMessage.addListener(request => {
   switch (request.type) {
-    case 'register':
+    case 'REGISTER':
       if (request.options.isOnline) {
         enableListener();
       }
-      chrome.storage.sync.set({ wilSupportStaff: request.options });
+      break;
+    case 'RE_REGISTER':
+      disableListener();
       break;
     default:
       break;
